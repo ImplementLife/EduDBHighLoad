@@ -1,5 +1,7 @@
 package com.impllife.data.entity;
 
+import com.impllife.data.convert.TwoFactorAuthTypeConverter;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -22,6 +24,7 @@ public class User {
     private Date dateLastUpdateData;
 
     private boolean twoFactorAuthTypeEnable;
+    @Convert(converter = TwoFactorAuthTypeConverter.class)
     private TwoFactorAuthType twoFactorAuthType;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)

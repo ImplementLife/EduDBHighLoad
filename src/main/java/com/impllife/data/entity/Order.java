@@ -1,5 +1,7 @@
 package com.impllife.data.entity;
 
+import com.impllife.data.convert.OrderStatusConverter;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.Set;
@@ -12,6 +14,8 @@ public class Order {
     private Long id;
     private Date dateCreate;
     private Date dateLastUpdateStatus;
+    private double price;
+    @Convert(converter = OrderStatusConverter.class)
     private OrderStatus status;
 
     @OneToMany(mappedBy = "order", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
@@ -26,6 +30,15 @@ public class Order {
     private Address address;
 
     //region get set
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
     public Address getAddress() {
         return address;
     }

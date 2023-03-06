@@ -4,9 +4,9 @@ import com.impllife.data.convert.EnumWithId;
 
 public enum TwoFactorAuthType implements EnumWithId<Character> {
     VIBER('V'),
-    TELEGRAM('V'),
+    TELEGRAM('T'),
     SMS('S'),
-    VIA_TELEPHONE_CALL('T'),
+    VIA_TELEPHONE_CALL('C'),
     ;
 
     private final char c;
