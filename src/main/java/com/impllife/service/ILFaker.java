@@ -36,8 +36,8 @@ public class ILFaker {
     public void generate() {
         init();
         generateUsers();
-        generateCategories();
-        generateProducts();
+        //generateCategories();
+        //generateProducts();
         generateOrders();
         generateReview();
     }
@@ -67,7 +67,7 @@ public class ILFaker {
         LOG.info("Generate Products");
 
         List<Category> categories = categoryRepository.findAll();
-        for (int i = 0; i < 174; i++) {
+        for (int i = 0; i < 238; i++) {
             Product product = new Product();
             product.setName(fakerUA.commerce().productName());
             product.setDescription("Made in: " + fakerUA.country().name() + "\nMade by: " + fakerUA.company().name());
@@ -85,49 +85,56 @@ public class ILFaker {
         List<User> users = userRepository.findAll();
         List<Product> products = productRepository.findAll();
 
-        for (int i = 0; i < 350; i++) {
-            Order order = new Order();
-            order.setCustomer(getRandomElement(users));
-
-            User customer = order.getCustomer();
-            order.setAddress(getRandomElement(customer.getAddresses()));
-            order.setDateCreate(fakerUA.date().between(timeServiceStart, new Date()));
-            order.setDateLastUpdateStatus(order.getDateCreate());
-            order.setStatus(getRandomElement(OrderStatus.values()));
-
-            for (int j = 0; j < fakerUA.random().nextInt(1, 4); j++) {
-                OrderItem orderItem = new OrderItem();
-                orderItem.setQuantity(fakerUA.random().nextInt(1, 12));
-                Product product = getRandomElement(products);
-                orderItem.setProduct(product);
-                orderItem.setPrice(Double.parseDouble(String.format("%.2f", product.getPrice() * orderItem.getQuantity()).replace(",", ".")));
-
-                if (order.getItems().add(orderItem)) {
-                    order.setPrice(Double.parseDouble(String.format("%.2f", order.getPrice() + orderItem.getPrice()).replace(",", ".")));
-                }
-                orderItem.setOrder(order);
+        for (User user : users) {
+            int countOrders = fakerUA.random().nextInt(1, 4);
+            if (fakerUA.random().nextInt(0, 10) > 8) {
+                countOrders += fakerUA.random().nextInt(3, 14);
             }
+            for (int i = 0; i < countOrders; i++) {
+                Order order = new Order();
+                order.setCustomer(user);
 
-            orderRepository.save(order);
+                User customer = order.getCustomer();
+                order.setAddress(getRandomElement(customer.getAddresses()));
+                order.setDateCreate(fakerUA.date().between(timeServiceStart, new Date()));
+                order.setDateLastUpdateStatus(order.getDateCreate());
+                order.setStatus(getRandomElement(OrderStatus.values()));
+
+                int countProducts = fakerUA.random().nextInt(1, 7);
+                for (int j = 0; j < countProducts; j++) {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setQuantity(fakerUA.random().nextInt(1, 20));
+                    Product product = getRandomElement(products);
+                    orderItem.setProduct(product);
+                    orderItem.setPrice(Double.parseDouble(String.format("%.2f", product.getPrice() * orderItem.getQuantity()).replace(",", ".")));
+
+                    if (order.getItems().add(orderItem)) {
+                        order.setPrice(Double.parseDouble(String.format("%.2f", order.getPrice() + orderItem.getPrice()).replace(",", ".")));
+                    }
+                    orderItem.setOrder(order);
+                }
+
+                orderRepository.save(order);
+            }
         }
     }
 
     private void generateReview() {
         LOG.info("Generate Review");
-
-        List<Order> all = orderRepository.findAll();
-        for (int i = 0; i < fakerUA.random().nextInt(3, all.size()); i++) {
+        List<Product> products = productRepository.findAll();
+        long orders = orderRepository.count();
+        long users = userRepository.count();
+        int count = fakerUA.random().nextInt(3, (int) orders);
+        for (int i = 0; i < count; i++) {
             Review review = new Review();
-            Order order = all.get(i);
 
-            Set<OrderItem> items = order.getItems();
-            if (items.size() == 0) continue;
-            OrderItem item = getRandomElement(items);
-
-            review.setContent(fakerUA.lorem().characters(9, 53));
-            review.setProduct(item.getProduct());
-            review.setUser(item.getOrder().getCustomer());
-            review.setRating(fakerUA.random().nextInt(1, 6));
+            review.setContent(fakerUA.lorem().paragraph(fakerUA.random().nextInt(20, 53)));
+            review.setProduct(getRandomElement(products));
+            int id = fakerUA.random().nextInt(0, (int) users);
+            Optional<User> user = userRepository.findById((long) id);
+            if (user.isEmpty()) continue;
+            review.setUser(user.get());
+            review.setRating(fakerUA.random().nextInt(3, 5));
 
             reviewRepository.save(review);
         }
@@ -136,7 +143,7 @@ public class ILFaker {
     private void generateUsers() {
         LOG.info("Generate Users");
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 24542; i++) {
             User person = new User();
             person.setFirstName(fakerUA.name().firstName());
             person.setLastName(fakerUA.name().lastName());
@@ -154,7 +161,7 @@ public class ILFaker {
 
             person.setAddresses(new HashSet<>());
 
-            for (int j = 0; j < fakerUA.random().nextInt(1, 4); j++) {
+            for (int j = 0; j < fakerUA.random().nextInt(1, 2); j++) {
                 Address address = new Address();
                 address.setStreet(fakerUA.address().streetAddress());
                 address.setCity(fakerUA.address().city());

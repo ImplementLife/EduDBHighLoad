@@ -8,6 +8,7 @@ public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(length = 2500)
     private String content;
     private int rating;
 
