@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.text.DecimalFormat;
 import java.util.*;
 
 import static com.impllife.service.RandomUtils.getRandomElement;
@@ -33,6 +32,19 @@ public class ILFaker {
     private Date timeServiceStart;
 
     @PostConstruct
+    public void tst() {
+
+        time(() -> userRepository.findByIdEager(35L));
+        time(() -> orderRepository.findById(35L));
+        time(() -> userRepository.findAll(1L, 3L));
+    }
+    private void time(Runnable r) {
+        long t = System.nanoTime();
+        r.run();
+        LOG.info("time " + ((System.nanoTime() - t) / 1_000_000_000.0));
+    }
+
+    //@PostConstruct
     public void generate() {
         init();
         generateUsers();
