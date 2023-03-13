@@ -6,6 +6,9 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.Set;
 
+import static javax.persistence.CascadeType.*;
+import static javax.persistence.FetchType.*;
+
 @Entity
 @Table(name = "il_order")
 public class Order {
@@ -18,14 +21,14 @@ public class Order {
     @Convert(converter = OrderStatusConverter.class)
     private OrderStatus status;
 
-    @OneToMany(mappedBy = "order", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "order", cascade = {ALL}, fetch = LAZY)
     private Set<OrderItem> items = new java.util.LinkedHashSet<>();
 
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "customer_id")
     private User customer;
 
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "address_id")
     private Address address;
 

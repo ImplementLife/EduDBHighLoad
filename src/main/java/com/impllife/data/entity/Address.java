@@ -9,12 +9,21 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String street;
-    private String city;
+    private String country;
     private String state;
+    private String city;
+    private String street;
     private String zipCode;
 
     //region getters and setters
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
 
     public Long getId() {
         return id;

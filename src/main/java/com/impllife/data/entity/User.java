@@ -3,22 +3,22 @@ package com.impllife.data.entity;
 import com.impllife.data.convert.TwoFactorAuthTypeConverter;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
+
+import static javax.persistence.CascadeType.*;
 
 @Entity
 @Table(name = "il_user")
-public class User {
+public class User extends Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String firstName;
-    private String lastName;
-    private String name;
     private String phone;
     private String email;
+
+    @Embedded
+    private DateRange dates;
 
     private Date dateCreate;
     private Date dateLastUpdateData;
@@ -27,10 +27,25 @@ public class User {
     @Convert(converter = TwoFactorAuthTypeConverter.class)
     private TwoFactorAuthType twoFactorAuthType;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = {ALL})
     private Set<Address> addresses = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "customer")
+    private List<Order> orders = new ArrayList<>();
+
+    public DateRange getDates() {
+        return dates;
+    }
+
     //region get set
+
+    public List<Order> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
+    }
 
     public String getEmail() {
         return email;
@@ -38,22 +53,6 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
     }
 
     public Set<Address> getAddresses() {
@@ -69,14 +68,6 @@ public class User {
     }
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getPhone() {
