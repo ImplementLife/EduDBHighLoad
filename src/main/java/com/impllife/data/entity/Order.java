@@ -4,6 +4,7 @@ import com.impllife.data.convert.OrderStatusConverter;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static javax.persistence.CascadeType.*;
@@ -22,7 +23,7 @@ public class Order {
     private OrderStatus status;
 
     @OneToMany(mappedBy = "order", cascade = {ALL}, fetch = LAZY)
-    private Set<OrderItem> items = new java.util.LinkedHashSet<>();
+    private Set<OrderItem> items = new LinkedHashSet<>();
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "customer_id")
