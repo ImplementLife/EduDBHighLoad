@@ -1,6 +1,6 @@
 package com.impllife.data.convert;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 public class EnumConverter<E extends EnumWithId<ID>, ID> implements AttributeConverter<E, ID> {
     private final E[] values;

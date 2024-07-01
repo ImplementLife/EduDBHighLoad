@@ -8,6 +8,7 @@ public class RandomUtils {
 
     public static <T> T getRandomElement(Collection<T> collection) {
         int size = collection.size();
+        if (size <= 0) return null;
         int item = RANDOM.nextInt(size);
         int i = 0;
         for (T element : collection) {

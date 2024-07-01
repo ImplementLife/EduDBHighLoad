@@ -1,20 +1,24 @@
 package com.impllife.service;
 
+import com.github.javafaker.Commerce;
 import com.github.javafaker.Faker;
+import com.github.javafaker.Name;
 import com.impllife.data.entity.*;
+import com.impllife.data.entity.elasticsearch.ProductIndex;
 import com.impllife.data.jpa.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.impllife.service.es.ProductService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PostConstruct;
 import java.util.*;
 
 import static com.impllife.service.RandomUtils.getRandomElement;
 
 @Service
+@Slf4j
 public class ILFaker {
-    private static final Logger LOG = LoggerFactory.getLogger(ILFaker.class);
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -26,18 +30,22 @@ public class ILFaker {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private ProductService productService;
+
     private final Faker fakerUA = Faker.instance(new Locale("uk", "UA"));
     private final Faker fakerEN = Faker.instance(new Locale("en", "UA"));
     private Date timeServiceStart;
 
-    //@PostConstruct
+    @PostConstruct
     public void generate() {
         init();
-        generateUsers();
-        //generateCategories();
-        //generateProducts();
-        generateOrders();
-        generateReview();
+//        generateUsers();
+//        generateCategories();
+//        generateProducts();
+//        generateOrders();
+//        generateReview();
+        tst();
     }
 
     private void init() {
@@ -50,7 +58,7 @@ public class ILFaker {
     }
 
     private void generateCategories() {
-        LOG.info("Generate Categories");
+        log.info("Generate Categories");
 
         for (int i = 0; i < 37; i++) {
             Category category = new Category();
@@ -62,23 +70,35 @@ public class ILFaker {
     }
 
     private void generateProducts() {
-        LOG.info("Generate Products");
+        log.info("Generate Products");
 
         List<Category> categories = categoryRepository.findAll();
-        for (int i = 0; i < 238; i++) {
+        for (int i = 0; i < 23; i++) {
             Product product = new Product();
-            product.setName(fakerUA.commerce().productName());
-            product.setDescription("Made in: " + fakerUA.country().name() + "\nMade by: " + fakerUA.company().name());
-            product.setPrice(Double.parseDouble(fakerUA.commerce().price().replace(',', '.')));
+            Commerce commerce = fakerUA.commerce();
+            product.setName(commerce.productName());
+            String dscr = "Made in: " + fakerUA.country().name() + "\nMade by: " + fakerUA.company().name();
+            dscr += "\n\n" + genDscr();
+
+            product.setDescription(dscr);
+            product.setPrice(Double.parseDouble(commerce.price().replace(',', '.')));
+
 
             product.setCategory(getRandomElement(categories));
 
-            productRepository.save(product);
+            Product save = productRepository.save(product);
+            try {
+                productService.saveIndex(save);
+            } catch (Exception e) {
+//                log.error("err", e);
+                log.error("se err: {}", save);
+                throw e;
+            }
         }
     }
 
     private void generateOrders() {
-        LOG.info("Generate Orders");
+        log.info("Generate Orders");
 
         List<User> users = userRepository.findAll();
         List<Product> products = productRepository.findAll();
@@ -118,7 +138,7 @@ public class ILFaker {
     }
 
     private void generateReview() {
-        LOG.info("Generate Review");
+        log.info("Generate Review");
         List<Product> products = productRepository.findAll();
         long orders = orderRepository.count();
         long users = userRepository.count();
@@ -130,7 +150,7 @@ public class ILFaker {
             review.setProduct(getRandomElement(products));
             int id = fakerUA.random().nextInt(0, (int) users);
             Optional<User> user = userRepository.findById((long) id);
-            if (user.isEmpty()) continue;
+//            if (user.isEmpty()) continue;
             review.setUser(user.get());
             review.setRating(fakerUA.random().nextInt(3, 5));
 
@@ -139,13 +159,14 @@ public class ILFaker {
     }
 
     private void generateUsers() {
-        LOG.info("Generate Users");
+        log.info("Generate Users");
 
         for (int i = 0; i < 24542; i++) {
             User person = new User();
-            person.setFirstName(fakerUA.name().firstName());
-            person.setLastName(fakerUA.name().lastName());
-            person.setName(fakerUA.name().name());
+            Name name = fakerUA.name();
+            person.setFirstName(name.firstName());
+            person.setLastName(name.lastName());
+            person.setName(name.name());
             person.setPhone(fakerUA.phoneNumber().phoneNumber());
             person.setEmail(fakerEN.internet().emailAddress());
 
@@ -161,10 +182,11 @@ public class ILFaker {
 
             for (int j = 0; j < fakerUA.random().nextInt(1, 2); j++) {
                 Address address = new Address();
-                address.setStreet(fakerUA.address().streetAddress());
-                address.setCity(fakerUA.address().city());
-                address.setState(fakerUA.address().stateAbbr());
-                address.setZipCode(fakerUA.address().zipCode());
+                com.github.javafaker.Address fakerAddress = fakerUA.address();
+                address.setStreet(fakerAddress.streetAddress());
+                address.setCity(fakerAddress.city());
+                address.setState(fakerAddress.stateAbbr());
+                address.setZipCode(fakerAddress.zipCode());
                 person.getAddresses().add(address);
             }
 
@@ -172,4 +194,32 @@ public class ILFaker {
         }
     }
 
+    private String genDscr() {
+        Faker faker = new Faker(new Locale("uk"));
+
+        String productName = faker.commerce().productName();
+        String material = faker.commerce().material();
+        String color = faker.commerce().color();
+        String department = faker.commerce().department();
+        String price = faker.commerce().price();
+        String brand = faker.company().name();
+        String feature1 = faker.lorem().sentence();
+        String feature2 = faker.lorem().sentence();
+        String benefit1 = faker.lorem().sentence();
+        String benefit2 = faker.lorem().sentence();
+
+        String productDescription = String.format(
+            "Представляємо %s від %s! Цей %s продукт виготовлений з преміального %s і має стильний %s колір. " +
+                "Ідеально підходить для %s відділу, цей продукт ідеальний для %s. %s Він має %s. " +
+                "Все це може бути вашим всього за %s грн. Відчуйте найкращу якість і стиль з %s.",
+            productName, brand, material, color, department, feature1, feature2, benefit1, benefit2, price, productName
+        );
+        return productDescription;
+    }
+
+
+    private void tst() {
+        List<ProductIndex> phone = productService.findByNameContaining("Сша");
+        log.info("search");
+    }
 }

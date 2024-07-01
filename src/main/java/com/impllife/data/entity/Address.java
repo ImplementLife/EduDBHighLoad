@@ -1,6 +1,6 @@
 package com.impllife.data.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "il_address")

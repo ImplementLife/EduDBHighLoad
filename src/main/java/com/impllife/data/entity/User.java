@@ -2,10 +2,10 @@ package com.impllife.data.entity;
 
 import com.impllife.data.convert.TwoFactorAuthTypeConverter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.*;
 
-import static javax.persistence.CascadeType.*;
+import static jakarta.persistence.CascadeType.*;
 
 @Entity
 @Table(name = "il_user")

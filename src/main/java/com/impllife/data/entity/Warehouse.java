@@ -1,8 +1,8 @@
 package com.impllife.data.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
-import static javax.persistence.FetchType.LAZY;
+import static jakarta.persistence.FetchType.LAZY;
 
 @Entity(name = "il_warehouse")
 public class Warehouse {

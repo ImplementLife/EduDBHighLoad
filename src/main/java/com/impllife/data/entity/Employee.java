@@ -2,7 +2,7 @@ package com.impllife.data.entity;
 
 import com.impllife.data.convert.EmployeeRoleConverter;
 
-import javax.persistence.Convert;
+import jakarta.persistence.Convert;
 
 public class Employee extends Person {
 

@@ -1,6 +1,6 @@
 package com.impllife.data.entity;
 
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public class Person {
